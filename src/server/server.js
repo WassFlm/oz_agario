@@ -13,7 +13,7 @@ const chatRepository = require('./repositories/chat-repository');
 const config = require('../../config');
 const util = require('./lib/util');
 const mapUtils = require('./map/map');
-const {getPosition} = require("./lib/entityUtils");
+const { getPosition } = require("./lib/entityUtils");
 
 let map = new mapUtils.Map(config);
 
@@ -45,9 +45,8 @@ io.on('connection', function (socket) {
 
 function generateSpawnpoint() {
     let radius = util.massToRadius(config.defaultPlayerMass);
-    return getPosition(config.newPlayerInitialPosition === 'farthest', radius, map.players.data)
+    return getPosition(config.newPlayerInitialPosition === 'farthest', radius, map.players.data);
 }
-
 
 const addPlayer = (socket) => {
     var currentPlayer = new mapUtils.playerUtils.Player(socket.id);
@@ -64,6 +63,17 @@ const addPlayer = (socket) => {
             socket.disconnect();
         } else {
             console.log('[INFO] Player ' + clientPlayerData.name + ' connected!');
+
+            // --- SKIN HANDLING ---
+            const defaultSkin = "./img/solana.webp";
+            const skinFromClient = clientPlayerData.skin;
+            const skin = skinFromClient && skinFromClient.length > 0 ? skinFromClient : defaultSkin;
+
+            socket.skin = skin;
+            currentPlayer.skin = skin;
+            clientPlayerData.skin = skin;
+            // ----------------------
+
             sockets[socket.id] = socket;
 
             const sanitizedName = clientPlayerData.name.replace(/(<([^>]+)>)/ig, '');
@@ -196,7 +206,7 @@ const addPlayer = (socket) => {
     socket.on('2', () => {
         currentPlayer.userSplit(config.limitSplit, config.defaultPlayerMass);
     });
-}
+};
 
 const addSpectator = (socket) => {
     socket.on('gotit', function () {
@@ -209,7 +219,7 @@ const addSpectator = (socket) => {
         width: config.gameWidth,
         height: config.gameHeight
     });
-}
+};
 
 const tickPlayer = (currentPlayer) => {
     if (currentPlayer.lastHeartbeat < new Date().getTime() - config.maxHeartbeatInterval) {
@@ -235,8 +245,8 @@ const tickPlayer = (currentPlayer) => {
     };
 
     const canEatVirus = (cell, cellCircle, virus) => {
-        return virus.mass < cell.mass && isEntityInsideCircle(virus, cellCircle)
-    }
+        return virus.mass < cell.mass && isEntityInsideCircle(virus, cellCircle, virus);
+    };
 
     const cellsToSplit = [];
     for (let cellIndex = 0; cellIndex < currentPlayer.cells.length; cellIndex++) {
@@ -250,7 +260,7 @@ const tickPlayer = (currentPlayer) => {
 
         if (eatenVirusIndexes.length > 0) {
             cellsToSplit.push(cellIndex);
-            map.viruses.delete(eatenVirusIndexes)
+            map.viruses.delete(eatenVirusIndexes);
         }
 
         let massGained = eatenMassIndexes.reduce((acc, index) => acc + map.massFood.data[index].mass, 0);
@@ -298,7 +308,7 @@ const calculateLeaderboard = () => {
             }
         }
     }
-}
+};
 
 const gameloop = () => {
     if (map.players.data.length > 0) {
@@ -312,6 +322,8 @@ const gameloop = () => {
 const sendUpdates = () => {
     spectators.forEach(updateSpectator);
     map.enumerateWhatPlayersSee(function (playerData, visiblePlayers, visibleFood, visibleMass, visibleViruses) {
+        // playerData = the local player
+        // visiblePlayers = other users
         sockets[playerData.id].emit('serverTellPlayerMove', playerData, visiblePlayers, visibleFood, visibleMass, visibleViruses);
         if (leaderboardChanged) {
             sendLeaderboard(sockets[playerData.id]);
@@ -326,7 +338,8 @@ const sendLeaderboard = (socket) => {
         players: map.players.data.length,
         leaderboard
     });
-}
+};
+
 const updateSpectator = (socketID) => {
     let playerData = {
         x: config.gameWidth / 2,
@@ -335,13 +348,14 @@ const updateSpectator = (socketID) => {
         massTotal: 0,
         hue: 100,
         id: socketID,
-        name: ''
+        name: '',
+        skin: "./img/solana.webp" // spectator "skin" if needed
     };
     sockets[socketID].emit('serverTellPlayerMove', playerData, map.players.data, map.food.data, map.massFood.data, map.viruses.data);
     if (leaderboardChanged) {
         sendLeaderboard(sockets[socketID]);
     }
-}
+};
 
 setInterval(tickGame, 1000 / 60);
 setInterval(gameloop, 1000);

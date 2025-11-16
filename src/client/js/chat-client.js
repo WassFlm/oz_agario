@@ -20,7 +20,7 @@ class ChatClient {
         });
         global.chatClient = this;
     }
-
+    
     // TODO: Break out many of these GameControls into separate classes.
 
     registerFunctions() {

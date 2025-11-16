@@ -41,7 +41,8 @@ exports.Map = class {
             var visibleFood = this.food.data.filter(entity => isVisibleEntity(entity, currentPlayer, false));
             var visibleViruses = this.viruses.data.filter(entity => isVisibleEntity(entity, currentPlayer));
             var visibleMass = this.massFood.data.filter(entity => isVisibleEntity(entity, currentPlayer));
-
+            
+            // 
             const extractData = (player) => {
                 return {
                     x: player.x,
@@ -50,7 +51,8 @@ exports.Map = class {
                     massTotal: Math.round(player.massTotal),
                     hue: player.hue,
                     id: player.id,
-                    name: player.name
+                    name: player.name,
+                    skin: player.skin
                 };
             }
 

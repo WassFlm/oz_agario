@@ -24,16 +24,50 @@
         </div>
         <canvas tabindex="1" id="cvs"></canvas>
     </div>
+
     <div id="startMenuWrapper">
         <div id="startMenu">
             <p>Open Agar</p>
-            <input type="text" tabindex="0" autofocus placeholder="Enter your name here" id="playerNameInput" maxlength="25" />
+
+            <input
+                type="text"
+                tabindex="0"
+                autofocus
+                placeholder="Enter your name here"
+                id="playerNameInput"
+                maxlength="25"
+            />
             <b class="input-error">Nick must be alphanumeric characters only!</b>
             <br />
-            <a onclick="document.getElementById('spawn_cell').play();"><button id="startButton">Play</button></a>
-            <button id="spectateButton">Spectate</button>
-            <button id="settingsButton">Settings</button>
+
+            <!-- Main menu buttons share .btn .btn-primary -->
+            <a onclick="document.getElementById('spawn_cell').play();">
+                <button id="startButton" class="btn btn-primary">Play</button>
+            </a>
+            <button id="skinsButton" class="btn btn-primary">Skins</button>
+            <!-- <button id="spectateButton" class="btn btn-primary">Spectate</button> -->
+            <button id="settingsButton" class="btn btn-primary">Settings</button>
+            <button id="contractButton" class="btn btn-primary">
+                Contract Address (0x7f2c1ae4b9a1d085e6f4d9b12ac9c3d63d1e8f21)
+            </button>
+
+            <div id="skinSelectedToast">Skin selected!</div>
+
+            <!-- Airdrop wheel section -->
+            <div id="wheelSection">
+                <h3>Airdrop Wheel</h3>
+                <div class="wheel-wrapper">
+                    <canvas id="wheelCanvas" width="260" height="260"></canvas>
+                    <div class="wheel-pointer"></div>
+                </div>
+                <button id="spinWheelButton" class="btn btn-primary">Spin Wheel</button>
+                <div id="wheelResult"></div>
+            </div>
+
+            <div id="skinSelectedToast">Skin selected!</div>
+
             <br />
+
             <div id="settings">
                 <h3>Settings</h3>
                 <ul>
@@ -46,6 +80,7 @@
                     <label><input id="darkMode" type="checkbox">Toggle Dark Mode</label>
                 </ul>
             </div>
+
             <div id="instructions">
                 <h3>Gameplay</h3>
                 <ul>
@@ -55,8 +90,54 @@
                     <li>Objective: Try to get fat and eat other players.</li>
                 </ul>
             </div>
+
+            <!-- Skins overlay -->
+            <div id="skinsMenu">
+                <div class="skins-panel">
+                    <h2>Select your skin</h2>
+                    <div class="skins-grid">
+                        <div class="skin-item">
+                            <div class="skin-image">
+                                <img src="./img/alon.webp" alt="Skin 1">
+                            </div>
+                            <button class="skin-select btn btn-primary">Select</button>
+                        </div>
+
+                        <div class="skin-item">
+                            <div class="skin-image">
+                                <img src="./img/doge.png" alt="Skin 2">
+                            </div>
+                            <button class="skin-select btn btn-primary">Select</button>
+                        </div>
+
+                        <div class="skin-item">
+                            <div class="skin-image">
+                                <img src="./img/pepe.png" alt="Skin 3">
+                            </div>
+                            <button class="skin-select btn btn-primary">Select</button>
+                        </div>
+
+                        <div class="skin-item">
+                            <div class="skin-image">
+                                <img src="./img/shib.png" alt="Skin 4">
+                            </div>
+                            <button class="skin-select btn btn-primary">Select</button>
+                        </div>
+
+                        <div class="skin-item">
+                            <div class="skin-image">
+                                <img src="./img/dude.jpeg" alt="Skin 5">
+                            </div>
+                            <button class="skin-select btn btn-primary">Select</button>
+                        </div>
+                        <!-- Add more .skin-item as needed -->
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
+
     <!-- JS -->
     <script src="//code.jquery.com/jquery-2.2.0.min.js"></script>
     <script src="js/app.js"></script>

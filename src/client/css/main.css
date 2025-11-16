@@ -1,6 +1,11 @@
+/* =========================================
+   Global base styles
+========================================= */
+
 * {
     font-family: sans-serif;
     font-size: 14px;
+    color: white;
 }
 
 html, body {
@@ -14,15 +19,31 @@ html, body, canvas {
     margin: 0;
     padding: 0;
     background: rgba(0, 0, 0, 0.4);
-
 }
 
+/* Disable text selection on divs (for smoother game UI) */
 div {
-    -webkit-user-select: none; /* webkit (safari, chrome) browsers */
-    -moz-user-select: none; /* mozilla browsers */
-    -khtml-user-select: none; /* webkit (konqueror) browsers */
-    -ms-user-select: none; /* IE10+ */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -ms-user-select: none;
 }
+
+/* Remove default focus outline for clickable elements */
+*:focus {
+    outline: 1px solid transparent;
+    border-style: none;
+}
+
+input[type="image"]:focus {
+    border: none;
+    outline: 1px solid transparent;
+    border-style: none;
+}
+
+/* =========================================
+   In-game UI: split / feed buttons, status, chat
+========================================= */
 
 #split {
     position: absolute;
@@ -65,6 +86,7 @@ div {
     font-size: 16.1px;
 }
 
+/* Chat panel */
 .chatbox {
     position: absolute;
     width: 300px;
@@ -118,6 +140,14 @@ div {
     outline: none;
 }
 
+/* =========================================
+   Start menu layout
+========================================= */
+
+#startMenuWrapper {
+    z-index: 2;
+}
+
 #startMenu {
     position: relative;
     margin: auto;
@@ -125,9 +155,7 @@ div {
     width: 350px;
     padding: 20px;
     border-radius: 5px;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    background-color: white;
+    background-color: rgb(26, 26, 26);
     box-sizing: border-box;
 }
 
@@ -138,6 +166,7 @@ div {
     font-weight: bold;
 }
 
+/* Player name input */
 #playerNameInput {
     width: 100%;
     text-align: center;
@@ -146,80 +175,24 @@ div {
     transition: box-shadow 0.3s, border 0.3s;
     box-sizing: border-box;
     border-radius: 5px;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
     margin-bottom: 10px;
     outline: none;
 }
 
-#playerNameInput:focus, #playerNameInput.focus {
+#playerNameInput:focus,
+#playerNameInput.focus {
     border: solid 1px #CCCCCC;
     box-shadow: 0 0 3px 1px #DDDDDD;
 }
 
-#startButton, #spectateButton {
-    position: relative;
-    margin: auto;
-    margin-top: 10px;
-    width: 100%;
-    height: 40px;
-    box-sizing: border-box;
-    font-size: large;
-    color: white;
-    text-align: center;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-    background: #2ecc71;
-    border: 0;
-    border-bottom: 2px solid #28be68;
-    cursor: pointer;
-    -webkit-box-shadow: inset 0 -2px #28be68;
-    box-shadow: inset 0 -2px #28be68;
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    margin-bottom: 10px;
+/* Nickname error text */
+#startMenu .input-error {
+    color: red;
+    opacity: 0;
+    font-size: 12px;
 }
 
-#spectateButton:active, #spectateButton:hover,
-#startButton:active, #startButton:hover {
-    top: 1px;
-    background: #55D88B;
-    outline: none;
-    -webkit-box-shadow: none;
-    box-shadow: none;
-}
-
-#settingsButton {
-    position: relative;
-    margin: auto;
-    margin-top: 10px;
-    width: 100%;
-    height: 40px;
-    box-sizing: border-box;
-    font-size: large;
-    color: white;
-    text-align: center;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-    background: #2ecc71;
-    border: 0;
-    border-bottom: 2px solid #28be68;
-    cursor: pointer;
-    -webkit-box-shadow: inset 0 -2px #28be68;
-    box-shadow: inset 0 -2px #28be68;
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    margin-bottom: 10px;
-}
-
-#settingsButton:active, #settingsButton:hover {
-    top: 1px;
-    background: #55D88B;
-    outline: none;
-    -webkit-box-shadow: none;
-    box-shadow: none;
-}
-
+/* Settings dropdown animation */
 #settings, #startMenuWrapper {
     -webkit-transition: max-height 1s;
     -moz-transition: max-height 1s;
@@ -244,15 +217,56 @@ div {
     margin-top: 0;
 }
 
-#startMenu .input-error {
-    color: red;
-    opacity: 0;
-    font-size : 12px;
+/* =========================================
+   Generic buttons (.btn + variants)
+========================================= */
+
+.btn {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 40px;
+    margin: 10px auto 10px auto;
+    box-sizing: border-box;
+    font-size: large;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
-#startMenuWrapper {
-    z-index: 2;
+/* Primary green button (Play, Skins, Settings, Contract, skin-select) */
+.btn-primary {
+    background: #2ecc71;
+    border-bottom: 2px solid #28be68;
+    -webkit-box-shadow: inset 0 -2px #28be68;
+    box-shadow: inset 0 -2px #28be68;
 }
+
+/* Hover / active effect for primary buttons */
+.btn-primary:hover,
+.btn-primary:active {
+    top: 1px;
+    background: #55D88B;
+    outline: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+/* Keep IDs for JS, but no extra styles needed beyond .btn / .btn-primary */
+#startButton,
+#skinsButton,
+#contractButton,
+#settingsButton,
+.skin-select {
+    /* All styling comes from .btn and .btn-primary */
+}
+
+/* =========================================
+   Game area container
+========================================= */
 
 #gameAreaWrapper {
     position: absolute !important;
@@ -261,25 +275,225 @@ div {
     opacity: 0;
 }
 
-@media only screen  and (min-width : 1224px) {
-#mobile {
-display: none;
-	}
+/* =========================================
+   Responsive tweaks
+========================================= */
+
+@media only screen and (min-width: 1224px) {
+    #mobile {
+        display: none;
+    }
 }
 
-@media only screen  and (max-width : 1224px) {
-#chatbox {
-display: none;
-        }
+@media only screen and (max-width: 1224px) {
+    #chatbox {
+        display: none;
+    }
 }
 
-input [type="image"]:focus{
- border:none;
- outline: 1px solid transparent;
- border-style: none;
+/* =========================================
+   Skins overlay + selection feedback
+========================================= */
+
+/* Fullscreen overlay for skins menu */
+#skinsMenu {
+    position: fixed;
+    inset: 0;
+    display: none; /* shown via JS */
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.5);
 }
 
-*:focus {
- outline: 1px solid transparent;
- border-style: none;
+/* Main skin panel */
+#skinsMenu .skins-panel {
+    background: #111;
+    border-radius: 16px;
+    padding: 24px 28px;
+    max-width: 700px;
+    width: 90%;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#skinsMenu h2 {
+    margin: 0 0 16px;
+    text-align: center;
+    font-size: 22px;
+    color: #fff;
+}
+
+/* Grid layout of skin items */
+#skinsMenu .skins-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 18px;
+}
+
+/* Individual skin card */
+#skinsMenu .skin-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 10px;
+    background: radial-gradient(circle at top, #222, #101010);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Round skin image */
+#skinsMenu .skin-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+#skinsMenu .skin-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Hover effect on the skin itself */
+#skinsMenu .skin-item:hover .skin-image {
+    transform: scale(1.06);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Extra spacing for skin select button inside card */
+#skinsMenu .skin-select {
+    margin-top: 4px;
+}
+
+/* Selected skin visual feedback */
+#skinsMenu .skin-item.selected {
+    border-color: #2ecc71;
+    box-shadow: 0 0 18px rgba(46, 204, 113, 0.8);
+    position: relative;
+}
+
+/* Pop animation when selected */
+@keyframes skin-pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+#skinsMenu .skin-item.selected .skin-image {
+    animation: skin-pop 0.25s ease-out;
+    border-color: rgba(46, 204, 113, 0.9);
+}
+
+/* Small checkmark badge in top-right of selected skin */
+#skinsMenu .skin-item.selected::after {
+    content: "✓";
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 16px;
+    color: #2ecc71;
+    text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+}
+
+/* Toast that shows when skin is selected */
+#skinSelectedToast {
+    margin-top: 4px;
+    text-align: center;
+    font-size: 12px;
+    color: #2ecc71;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+}
+
+#skinSelectedToast.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* =========================================
+   Airdrop wheel
+========================================= */
+
+#wheelSection {
+    margin-top: 14px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+}
+
+#wheelSection h3 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    opacity: 0.9;
+}
+
+.wheel-wrapper {
+    position: relative;
+    width: 260px;
+    height: 260px;
+    margin: 0 auto 8px auto;
+}
+
+/* The wheel canvas */
+#wheelCanvas {
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, #222 0%, #050505 70%);
+    box-shadow:
+        0 0 18px rgba(0, 0, 0, 0.8),
+        0 0 24px rgba(0, 255, 170, 0.35);
+}
+
+/* Pointer at the top of the wheel */
+.wheel-pointer {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 16px solid #f1c40f;
+    filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.8));
+}
+
+/* Result text under the button */
+#wheelResult {
+    margin-top: 4px;
+    font-size: 12px;
+    min-height: 16px;
+    color: #bbbbbb;
+}
+
+/* Win / lose colors */
+#wheelResult.win {
+    color: #2ecc71;
+    text-shadow: 0 0 6px rgba(46, 204, 113, 0.8);
+}
+
+#wheelResult.lose {
+    color: #e74c3c;
+    text-shadow: 0 0 4px rgba(231, 76, 60, 0.6);
+}
+
+/* Optional small glow on spin button while spinning */
+.btn-primary.spinning {
+    box-shadow: 0 0 12px rgba(0, 255, 170, 0.7);
 }

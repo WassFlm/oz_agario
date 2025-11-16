@@ -87,6 +87,7 @@ exports.Player = class {
         this.id = id;
         this.hue = Math.round(Math.random() * 360);
         this.name = null;
+        this.skin = "abcdedae"
         this.admin = false;
         this.screenWidth = null;
         this.screenHeight = null;
@@ -100,6 +101,7 @@ exports.Player = class {
         this.massTotal = defaultPlayerMass;
         this.x = position.x;
         this.y = position.y;
+        this.skin = 'test123'
         this.target = {
             x: 0,
             y: 0
@@ -110,6 +112,7 @@ exports.Player = class {
         this.name = playerData.name;
         this.screenWidth = playerData.screenWidth;
         this.screenHeight = playerData.screenHeight;
+        this.skin = playerData.skin
         this.setLastHeartbeat();
     }
 
