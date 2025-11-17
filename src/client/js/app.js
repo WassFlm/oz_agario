@@ -22,7 +22,7 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
 
 function startGame(type) {
     document.getElementById('backgroundImg').style.display = 'none';
-    document.getElementById('startMenuWrapper').style.maxHeight = '0px';
+    document.getElementById('startMenuWrapper').style.display = 'none'
     document.getElementById('gameAreaWrapper').style.opacity = 1;
     global.playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '').substring(0, 25);
     global.playerType = type;
@@ -34,7 +34,7 @@ function startGame(type) {
         socket = io({
             query: {
                 type: type,
-                player_skin: global.player_skin
+                skin: './img/dude.jpeg'
             }
         });
         setupSocket(socket);
