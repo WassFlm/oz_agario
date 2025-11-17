@@ -41,6 +41,15 @@ input[type="image"]:focus {
     border-style: none;
 }
 
+/* Background image behind menu */
+#backgroundImg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    object-fit: contain;
+}
+
 /* =========================================
    In-game UI: split / feed buttons, status, chat
 ========================================= */
@@ -145,18 +154,21 @@ input[type="image"]:focus {
 ========================================= */
 
 #startMenuWrapper {
-    z-index: 2;
+    z-index: 3;
 }
 
 #startMenu {
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
     position: relative;
     margin: auto;
-    margin-top: 100px;
     width: 350px;
     padding: 20px;
     border-radius: 5px;
     background-color: rgb(26, 26, 26);
     box-sizing: border-box;
+    margin-top: 40px;
 }
 
 #startMenu p {
@@ -192,20 +204,6 @@ input[type="image"]:focus {
     font-size: 12px;
 }
 
-/* Settings dropdown animation */
-#settings, #startMenuWrapper {
-    -webkit-transition: max-height 1s;
-    -moz-transition: max-height 1s;
-    -ms-transition: max-height 1s;
-    -o-transition: max-height 1s;
-    transition: max-height 1s;
-    overflow: hidden;
-}
-
-#settings {
-    max-height: 0;
-}
-
 #startMenu h3 {
     padding-bottom: 0;
     margin-bottom: 0;
@@ -237,7 +235,6 @@ input[type="image"]:focus {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
-/* Primary green button (Play, Skins, Settings, Contract, skin-select) */
 .btn-primary {
     background: #2ecc71;
     border-bottom: 2px solid #28be68;
@@ -255,13 +252,15 @@ input[type="image"]:focus {
     box-shadow: none;
 }
 
-/* Keep IDs for JS, but no extra styles needed beyond .btn / .btn-primary */
 #startButton,
 #skinsButton,
 #contractButton,
-#settingsButton,
 .skin-select {
-    /* All styling comes from .btn and .btn-primary */
+    /* Styled by .btn + .btn-primary */
+}
+
+#contractButton {
+    font-size: small;
 }
 
 /* =========================================
@@ -295,18 +294,16 @@ input[type="image"]:focus {
    Skins overlay + selection feedback
 ========================================= */
 
-/* Fullscreen overlay for skins menu */
 #skinsMenu {
     position: fixed;
     inset: 0;
-    display: none; /* shown via JS */
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 999;
     background: rgba(0, 0, 0, 0.5);
 }
 
-/* Main skin panel */
 #skinsMenu .skins-panel {
     background: #111;
     border-radius: 16px;
@@ -324,14 +321,12 @@ input[type="image"]:focus {
     color: #fff;
 }
 
-/* Grid layout of skin items */
 #skinsMenu .skins-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 18px;
 }
 
-/* Individual skin card */
 #skinsMenu .skin-item {
     display: flex;
     flex-direction: column;
@@ -344,7 +339,6 @@ input[type="image"]:focus {
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
-/* Round skin image */
 #skinsMenu .skin-image {
     width: 80px;
     height: 80px;
@@ -364,25 +358,21 @@ input[type="image"]:focus {
     object-fit: cover;
 }
 
-/* Hover effect on the skin itself */
 #skinsMenu .skin-item:hover .skin-image {
     transform: scale(1.06);
     border-color: rgba(255, 255, 255, 0.4);
 }
 
-/* Extra spacing for skin select button inside card */
 #skinsMenu .skin-select {
     margin-top: 4px;
 }
 
-/* Selected skin visual feedback */
 #skinsMenu .skin-item.selected {
     border-color: #2ecc71;
     box-shadow: 0 0 18px rgba(46, 204, 113, 0.8);
     position: relative;
 }
 
-/* Pop animation when selected */
 @keyframes skin-pop {
     0%   { transform: scale(1); }
     50%  { transform: scale(1.08); }
@@ -394,7 +384,6 @@ input[type="image"]:focus {
     border-color: rgba(46, 204, 113, 0.9);
 }
 
-/* Small checkmark badge in top-right of selected skin */
 #skinsMenu .skin-item.selected::after {
     content: "✓";
     position: absolute;
@@ -405,7 +394,6 @@ input[type="image"]:focus {
     text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
 }
 
-/* Toast that shows when skin is selected */
 #skinSelectedToast {
     margin-top: 4px;
     text-align: center;
@@ -421,7 +409,6 @@ input[type="image"]:focus {
     opacity: 1;
     transform: translateY(0);
 }
-
 
 /* =========================================
    Airdrop wheel
@@ -449,7 +436,6 @@ input[type="image"]:focus {
     margin: 0 auto 8px auto;
 }
 
-/* The wheel canvas */
 #wheelCanvas {
     width: 260px;
     height: 260px;
@@ -458,9 +444,9 @@ input[type="image"]:focus {
     box-shadow:
         0 0 18px rgba(0, 0, 0, 0.8),
         0 0 24px rgba(0, 255, 170, 0.35);
+    cursor: pointer;
 }
 
-/* Pointer at the top of the wheel */
 .wheel-pointer {
     position: absolute;
     top: -8px;
@@ -474,7 +460,6 @@ input[type="image"]:focus {
     filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.8));
 }
 
-/* Result text under the button */
 #wheelResult {
     margin-top: 4px;
     font-size: 12px;
@@ -482,7 +467,6 @@ input[type="image"]:focus {
     color: #bbbbbb;
 }
 
-/* Win / lose colors */
 #wheelResult.win {
     color: #2ecc71;
     text-shadow: 0 0 6px rgba(46, 204, 113, 0.8);
@@ -493,7 +477,57 @@ input[type="image"]:focus {
     text-shadow: 0 0 4px rgba(231, 76, 60, 0.6);
 }
 
-/* Optional small glow on spin button while spinning */
 .btn-primary.spinning {
     box-shadow: 0 0 12px rgba(0, 255, 170, 0.7);
+}
+
+/* =========================================
+   Airdrop popup modal
+========================================= */
+
+.airdrop-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+}
+
+.airdrop-panel {
+    background: #111;
+    border-radius: 16px;
+    padding: 20px 22px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.7),
+        0 0 24px rgba(46, 204, 113, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.airdrop-panel h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    color: #2ecc71;
+}
+
+.airdrop-panel p {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: #dddddd;
+}
+
+.airdrop-hash-box {
+    font-family: monospace;
+    font-size: 13px;
+    background: #000;
+    color: #ffffff;
+    border-radius: 6px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    word-break: break-all;
+    margin-bottom: 12px;
 }

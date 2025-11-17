@@ -7,7 +7,7 @@ var global = require('./global');
 var playerNameInput = document.getElementById('playerNameInput');
 var socket;
 
-// DEFAULT SKIN (hardcoded)
+// DEFAULT SKIN
 global.player_skin = "./img/dude.jpeg";
 
 var debug = function (args) {
@@ -21,7 +21,7 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
 }
 
 function startGame(type) {
-
+    document.getElementById('backgroundImg').style.display = 'none';
     document.getElementById('startMenuWrapper').style.maxHeight = '0px';
     document.getElementById('gameAreaWrapper').style.opacity = 1;
     global.playerName = playerNameInput.value.replace(/(<([^>]+)>)/ig, '').substring(0, 25);
@@ -31,7 +31,6 @@ function startGame(type) {
     global.screen.height = window.innerHeight;
 
     if (!socket) {
-        // we can still send skin in query if we want, but the real skin comes through gotit
         socket = io({
             query: {
                 type: type,
@@ -40,8 +39,10 @@ function startGame(type) {
         });
         setupSocket(socket);
     }
+
     if (!global.animLoopHandle)
         animloop();
+
     socket.emit('respawn');
     window.chat.socket = socket;
     window.chat.registerFunctions();
@@ -58,73 +59,92 @@ function validNick() {
 
 window.onload = function () {
 
-    var btn = document.getElementById('startButton'),
-        btnS = document.getElementById('spectateButton'),
+    var btn           = document.getElementById('startButton'),
         nickErrorText = document.querySelector('#startMenu .input-error'),
-        skinsButton = document.getElementById("skinsButton"),
+        skinsButton   = document.getElementById("skinsButton"),
+        contractButton = document.getElementById("contractButton"),
         skinsContainer = document.getElementById("skinsMenu"),
-        selectButtons = document.getElementsByClassName('skin-select'); // list of select buttons
-    // handling select buttons (skins)
-    // choose skin → set global.player_skin from the image in that skin-item
+        selectButtons  = document.getElementsByClassName('skin-select');
+
+    // ===========================
+    // Skin selection logic
+    // ===========================
+    const skinToast = document.getElementById('skinSelectedToast');
+
     for (const button of selectButtons) {
         button.onclick = () => {
-            skinsContainer.style.display = "none";
-            let img = button.parentElement.querySelector(".skin-image img");
+            let card = button.parentElement;
+            let img = card.querySelector(".skin-image img");
+
             if (img && img.src) {
                 global.player_skin = img.src;
             } else {
-                // fallback to our default if something is wrong
                 global.player_skin = "./img/solana.webp";
             }
+
+            const allItems = document.querySelectorAll("#skinsMenu .skin-item");
+            allItems.forEach(item => item.classList.remove("selected"));
+            card.classList.add("selected");
+
+            if (skinToast) {
+                skinToast.textContent = "Skin selected!";
+                skinToast.classList.add("visible");
+                setTimeout(() => {
+                    skinToast.classList.remove("visible");
+                }, 1200);
+            }
+
+            skinsContainer.style.display = "none";
         };
     }
+
+    skinsButton.onclick = () => {
+        skinsContainer.style.display = "flex";
+    };
 
         // ===========================
     // Airdrop wheel logic
     // ===========================
-    const wheelCanvas = document.getElementById('wheelCanvas');
+    const wheelCanvas     = document.getElementById('wheelCanvas');
     const spinWheelButton = document.getElementById('spinWheelButton');
-    const wheelResult = document.getElementById('wheelResult');
+    const wheelResult     = document.getElementById('wheelResult');
+
+    // Modal elements
+    const airdropModal    = document.getElementById('airdropModal');
+    const airdropHashBox  = document.getElementById('airdropHash');
+    const closeAirdropBtn = document.getElementById('closeAirdropModal');
 
     if (wheelCanvas && spinWheelButton && wheelResult) {
-        const ctx = wheelCanvas.getContext('2d');
-        const FULL_ANGLE = Math.PI * 2;
-        const SLICE_COUNT = 20;
+        const ctx         = wheelCanvas.getContext('2d');
+        const FULL_ANGLE  = Math.PI * 2;
+        const SLICE_COUNT = 20;           // 3 slices total
         const SLICE_ANGLE = FULL_ANGLE / SLICE_COUNT;
-        const AIRDROP_INDEX = 7; // index of the winning slice (0–19). Change if you want.
-        const radius = wheelCanvas.width / 2;
+        const AIRDROP_INDEX = 1;         // winning slice index (0,1,2)
+        const radius      = wheelCanvas.width / 2;
 
-        let currentRotation = 0;  // radians
-        let isSpinning = false;
+        let currentRotation = 0;
+        let isSpinning      = false;
 
-        // Precompute slice labels (19× Nothing, 1× AIRDROP)
         const sliceLabels = [];
         for (let i = 0; i < SLICE_COUNT; i++) {
             sliceLabels.push(i === AIRDROP_INDEX ? 'AIRDROP' : '');
         }
 
-        // Draw the wheel at currentRotation
         function drawWheel() {
             ctx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
 
             ctx.save();
-            ctx.translate(radius, radius); // center
+            ctx.translate(radius, radius);
             ctx.rotate(currentRotation);
 
             for (let i = 0; i < SLICE_COUNT; i++) {
                 const startAngle = i * SLICE_ANGLE;
-                const endAngle = startAngle + SLICE_ANGLE;
+                const endAngle   = startAngle + SLICE_ANGLE;
 
-                // Colors: mostly dark, with slight hue shifts
                 const isAirdrop = (i === AIRDROP_INDEX);
-                const baseColor = isAirdrop
-                    ? '#1abc9c'      // winning slice accent
-                    : '#111111';
-                const edgeColor = isAirdrop
-                    ? '#16a085'
-                    : '#222222';
+                const baseColor = isAirdrop ? '#1abc9c' : '#111111';
+                const edgeColor = isAirdrop ? '#16a085' : '#222222';
 
-                // slice background
                 ctx.beginPath();
                 ctx.moveTo(0, 0);
                 ctx.arc(0, 0, radius - 6, startAngle, endAngle);
@@ -136,19 +156,17 @@ window.onload = function () {
                 ctx.fillStyle = grad;
                 ctx.fill();
 
-                // slice border
                 ctx.strokeStyle = edgeColor;
-                ctx.lineWidth = 2;
+                ctx.lineWidth   = 2;
                 ctx.stroke();
 
-                // label
                 const label = sliceLabels[i];
                 if (label) {
                     ctx.save();
-                    const midAngle = startAngle + SLICE_ANGLE / 2;
-                    ctx.rotate(midAngle);
+                    const mid = startAngle + SLICE_ANGLE / 2;
+                    ctx.rotate(mid);
                     ctx.translate(radius * 0.6, 0);
-                    ctx.rotate(Math.PI / 2); // make text upright
+                    ctx.rotate(Math.PI / 2);
                     ctx.fillStyle = '#ffffff';
                     ctx.font = 'bold 14px sans-serif';
                     ctx.textAlign = 'center';
@@ -164,80 +182,134 @@ window.onload = function () {
         // Initial draw
         drawWheel();
 
-        // Ease-out function for animation
         function easeOutCubic(t) {
             return 1 - Math.pow(1 - t, 3);
         }
 
-        
+        // Generate 0x + 64 hex chars
+        function generateHash() {
+            if (window.crypto && window.crypto.getRandomValues) {
+                const bytes = new Uint8Array(32);
+                window.crypto.getRandomValues(bytes);
+
+                let hex = '0x';
+                for (let b of bytes) {
+                    hex += b.toString(16).padStart(2, '0');
+                }
+                return hex;
+            }
+
+            // fallback
+            let fallback = '0x';
+            for (let i = 0; i < 64; i++) {
+                fallback += Math.floor(Math.random() * 16).toString(16);
+            }
+            return fallback;
+        }
+
+        function showAirdropModal(hash) {
+            if (!airdropModal || !airdropHashBox) return;
+            airdropHashBox.textContent = hash;
+            airdropModal.style.display = 'flex';
+        }
+
+        if (closeAirdropBtn && airdropModal) {
+            closeAirdropBtn.addEventListener('click', () => {
+                airdropModal.style.display = 'none';
+            });
+
+            airdropModal.addEventListener('click', (e) => {
+                if (e.target === airdropModal) {
+                    airdropModal.style.display = 'none';
+                }
+            });
+        }
 
         function spinWheel() {
             if (isSpinning) return;
             isSpinning = true;
+
             wheelResult.textContent = '';
             wheelResult.classList.remove('win', 'lose');
             spinWheelButton.classList.add('spinning');
 
-            const duration = 3000; // ms
-            const start = performance.now();
+            const duration = 3000;
+            const start    = performance.now();
 
-            // Random final slice (heavily biased to "nothing" automatically because 19/20)
-            const targetSlice = Math.floor(Math.random() * SLICE_COUNT);
-            // Extra rotations for nice spin (3–6 full turns)
-            const extraTurns = 3 + Math.random() * 3;
+            // Just choose a random offset angle in [0, 2π)
+            const randomOffset = Math.random() * FULL_ANGLE;
+            const extraTurns   = 3 + Math.random() * 3;
 
-            // We want the pointer at top (−90°). Normalize so that after animation
-            // the target slice's center is at the pointer.
-            const targetAngle =
-                extraTurns * FULL_ANGLE +
-                (targetSlice * SLICE_ANGLE) +
-                SLICE_ANGLE / 2;
+            // This is the total additional rotation we will add
+            const targetRotation = extraTurns * FULL_ANGLE + randomOffset;
 
             const initialRotation = currentRotation;
 
             function animate(now) {
                 const elapsed = now - start;
-                const t = Math.min(elapsed / duration, 1);
-                const eased = easeOutCubic(t);
+                const t       = Math.min(elapsed / duration, 1);
+                const eased   = easeOutCubic(t);
 
-                currentRotation = initialRotation + targetAngle * eased;
+                currentRotation = initialRotation + targetRotation * eased;
                 drawWheel();
 
                 if (t < 1) {
                     requestAnimationFrame(animate);
                 } else {
-                    finishSpin(targetSlice);
+                    finishSpin();
                 }
             }
 
             requestAnimationFrame(animate);
         }
 
-        function finishSpin(targetSlice) {
+        function finishSpin() {
             isSpinning = false;
             spinWheelButton.classList.remove('spinning');
 
-            if (targetSlice === AIRDROP_INDEX) {
+            // Normalize rotation to [0, 2π)
+            let normalized = currentRotation % FULL_ANGLE;
+            if (normalized < 0) normalized += FULL_ANGLE;
+
+            // Pointer is at the TOP of the wheel → angle = -π/2 in canvas coordinates.
+            // A slice center at angle θ (in wheel space) is drawn at θ + normalized.
+            // We want θ + normalized ≡ -π/2  (mod 2π)
+            // => θ ≡ -π/2 - normalized.
+            let pointerAngle = -Math.PI / 2 - normalized;
+            pointerAngle %= FULL_ANGLE;
+            if (pointerAngle < 0) pointerAngle += FULL_ANGLE;
+
+            const landedIndex = Math.floor(pointerAngle / SLICE_ANGLE);
+
+            if (landedIndex === AIRDROP_INDEX) {
+                const hash = generateHash();
                 wheelResult.textContent = 'You won an AIRDROP!';
                 wheelResult.classList.add('win');
+                showAirdropModal(hash);
             } else {
                 wheelResult.textContent = 'Nothing this time...';
                 wheelResult.classList.add('lose');
             }
         }
 
+        // Spin on button click
         spinWheelButton.addEventListener('click', spinWheel);
+
+        // Spin when clicking the wheel itself
+        wheelCanvas.addEventListener('click', spinWheel);
+
+        // Optional: also spin via contract button
+        if (contractButton) {
+            contractButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                spinWheel();
+            });
+        }
     }
 
 
-
-    skinsButton.onclick = () => {
-        skinsContainer.style.display = "flex";
-    };
-
+    // Start game button
     btn.onclick = function () {
-
-        // Checks if the nick is valid.
         if (validNick()) {
             nickErrorText.style.opacity = 0;
             startGame('player');
@@ -245,58 +317,9 @@ window.onload = function () {
             nickErrorText.style.opacity = 1;
         }
     };
-    // Toast element
-    const skinToast = document.getElementById('skinSelectedToast');
-
-    // handling select buttons (skins)
-    for (const button of selectButtons) {
-        button.onclick = () => {
-            // 1) Set the skin
-            let card = button.parentElement; // .skin-item
-            let img = card.querySelector(".skin-image img");
-
-            if (img && img.src) {
-                global.player_skin = img.src;
-            } else {
-                global.player_skin = "./img/solana.webp";
-            }
-
-            // 2) Visually mark which skin is selected
-            const allItems = document.querySelectorAll("#skinsMenu .skin-item");
-            allItems.forEach(item => item.classList.remove("selected"));
-            card.classList.add("selected");
-
-            // 3) Show a small "Skin selected!" toast under Play button
-            if (skinToast) {
-                skinToast.textContent = "Skin selected!";
-                skinToast.classList.add("visible");
-
-                // Hide after 1.2 seconds
-                setTimeout(() => {
-                    skinToast.classList.remove("visible");
-                }, 1200);
-            }
-
-            // 4) (Optional) Close the skins menu after selecting
-            skinsContainer.style.display = "none";
-        };
-    }
-
-
-    var settingsMenu = document.getElementById('settingsButton');
-    var settings = document.getElementById('settings');
-
-    settingsMenu.onclick = function () {
-        if (settings.style.maxHeight == '300px') {
-            settings.style.maxHeight = '0px';
-        } else {
-            settings.style.maxHeight = '300px';
-        }
-    };
 
     playerNameInput.addEventListener('keypress', function (e) {
         var key = e.which || e.keyCode;
-
         if (key === global.KEY_ENTER) {
             if (validNick()) {
                 nickErrorText.style.opacity = 0;
@@ -308,7 +331,9 @@ window.onload = function () {
     });
 };
 
-// TODO: Break out into GameControls.
+// =========================================
+// Game + socket logic
+// =========================================
 
 var playerConfig = {
     border: 6,
@@ -339,18 +364,6 @@ global.target = target;
 window.canvas = new Canvas();
 window.chat = new ChatClient();
 
-var visibleBorderSetting = document.getElementById('visBord');
-visibleBorderSetting.onchange = settings.toggleBorder;
-
-var showMassSetting = document.getElementById('showMass');
-showMassSetting.onchange = settings.toggleMass;
-
-var continuitySetting = document.getElementById('continuity');
-continuitySetting.onchange = settings.toggleContinuity;
-
-var roundFoodSetting = document.getElementById('roundFood');
-roundFoodSetting.onchange = settings.toggleRoundFood;
-
 var c = window.canvas.cv;
 var graph = c.getContext('2d');
 
@@ -366,25 +379,21 @@ $("#split").click(function () {
 
 function handleDisconnect() {
     socket.close();
-    if (!global.kicked) { // We have a more specific error message 
+    if (!global.kicked) {
         render.drawErrorMessage('Disconnected!', graph, global.screen);
     }
 }
 
-// socket stuff.
 function setupSocket(socket) {
-    // Handle ping.
     socket.on('pongcheck', function () {
         var latency = Date.now() - global.startPingTime;
         debug('Latency: ' + latency + 'ms');
         window.chat.addSystemLine('Ping: ' + latency + 'ms');
     });
 
-    // Handle error.
     socket.on('connect_error', handleDisconnect);
     socket.on('disconnect', handleDisconnect);
 
-    // Handle connection.
     socket.on('welcome', function (playerSettings, gameSizes) {
         player = playerSettings;
         player.name = global.playerName;
@@ -392,12 +401,10 @@ function setupSocket(socket) {
         player.screenHeight = global.screen.height;
         player.target = window.canvas.target;
 
-        // Always set skin from our global (default solana or chosen skin)
-        player.skin = global.player_skin || "./img/solana.webp";
+        player.skin = player.skin || global.player_skin || "./img/solana.webp";
         global.player = player;
         window.chat.player = player;
 
-        // Send full player data back to server, including skin
         socket.emit('gotit', player);
 
         global.gameStart = true;
@@ -413,17 +420,20 @@ function setupSocket(socket) {
     });
 
     socket.on('playerDied', (data) => {
-        const player = isUnnamedCell(data.playerEatenName) ? 'An unnamed cell' : data.playerEatenName;
-
-        window.chat.addSystemLine('{GAME} - <b>' + (player) + '</b> was eaten');
+        const pname = isUnnamedCell(data.playerEatenName) ? 'An unnamed cell' : data.playerEatenName;
+        window.chat.addSystemLine('{GAME} - <b>' + pname + '</b> was eaten');
     });
 
     socket.on('playerDisconnect', (data) => {
-        window.chat.addSystemLine('{GAME} - <b>' + (isUnnamedCell(data.name) ? 'An unnamed cell' : data.name) + '</b> disconnected.');
+        window.chat.addSystemLine('{GAME} - <b>' +
+            (isUnnamedCell(data.name) ? 'An unnamed cell' : data.name) +
+            '</b> disconnected.');
     });
 
     socket.on('playerJoin', (data) => {
-        window.chat.addSystemLine('{GAME} - <b>' + (isUnnamedCell(data.name) ? 'An unnamed cell' : data.name) + '</b> joined.');
+        window.chat.addSystemLine('{GAME} - <b>' +
+            (isUnnamedCell(data.name) ? 'An unnamed cell' : data.name) +
+            '</b> joined.');
     });
 
     socket.on('leaderboard', (data) => {
@@ -450,23 +460,17 @@ function setupSocket(socket) {
         window.chat.addSystemLine(data);
     });
 
-    // Chat.
     socket.on('serverSendPlayerChat', function (data) {
         window.chat.addChatLine(data.sender, data.message, false);
     });
 
-    // Handle movement.
     socket.on('serverTellPlayerMove', function (playerData, userData, foodsList, massList, virusList) {
         if (global.playerType == 'player') {
-            console.log(playerData.skin);
-            
             player.x = playerData.x;
             player.y = playerData.y;
             player.hue = playerData.hue;
             player.massTotal = playerData.massTotal;
             player.cells = playerData.cells;
-            
-            // Keep whatever skin the server sends, or fall back to our global default
             player.skin = playerData.skin || global.player_skin || "./img/solana.webp";
         }
         users = userData;
@@ -475,7 +479,6 @@ function setupSocket(socket) {
         fireFood = massList;
     });
 
-    // Death.
     socket.on('RIP', function () {
         global.gameStart = false;
         render.drawErrorMessage('You died!', graph, global.screen);
@@ -494,8 +497,7 @@ function setupSocket(socket) {
         global.kicked = true;
         if (reason !== '') {
             render.drawErrorMessage('You were kicked for: ' + reason, graph, global.screen);
-        }
-        else {
+        } else {
             render.drawErrorMessage('You were kicked!', graph, global.screen);
         }
         socket.close();
@@ -528,7 +530,7 @@ window.cancelAnimFrame = (function (handle) {
 
 function animloop() {
     global.animLoopHandle = window.requestAnimFrame(animloop);
-    gameLoop(); 
+    gameLoop();
 }
 
 function gameLoop() {
@@ -537,25 +539,29 @@ function gameLoop() {
         graph.fillRect(0, 0, global.screen.width, global.screen.height);
 
         render.drawGrid(global, player, global.screen, graph);
+
         foods.forEach(food => {
             let position = getPosition(food, player, global.screen);
             render.drawFood(position, food, graph);
         });
+
         fireFood.forEach(fireFood => {
             let position = getPosition(fireFood, player, global.screen);
             render.drawFireFood(position, fireFood, playerConfig, graph);
         });
+
         viruses.forEach(virus => {
             let position = getPosition(virus, player, global.screen);
             render.drawVirus(position, virus, graph);
         });
 
-        let borders = { // Position of the borders on the screen
+        let borders = {
             left: global.screen.width / 2 - player.x,
             right: global.screen.width / 2 + global.game.width - player.x,
             top: global.screen.height / 2 - player.y,
             bottom: global.screen.height / 2 + global.game.height - player.y
         };
+
         if (global.borderDraw) {
             render.drawBorder(borders, graph);
         }
@@ -564,8 +570,7 @@ function gameLoop() {
         for (var i = 0; i < users.length; i++) {
             let color = 'hsl(' + users[i].hue + ', 100%, 50%)';
             let borderColor = 'hsl(' + users[i].hue + ', 100%, 45%)';
-            console.log(users[i].skin);
-            
+
             for (var j = 0; j < users[i].cells.length; j++) {
                 cellsToDraw.push({
                     color: color,
@@ -579,12 +584,14 @@ function gameLoop() {
                 });
             }
         }
+
         cellsToDraw.sort(function (obj1, obj2) {
             return obj1.mass - obj2.mass;
         });
+
         render.drawCells(cellsToDraw, playerConfig, global.toggleMassState, borders, graph);
 
-        socket.emit('0', window.canvas.target); // playerSendTarget "Heartbeat".
+        socket.emit('0', window.canvas.target); // Heartbeat.
     }
 }
 
@@ -593,13 +600,18 @@ window.addEventListener('resize', resize);
 function resize() {
     if (!socket) return;
 
-    player.screenWidth = c.width = global.screen.width = global.playerType == 'player' ? window.innerWidth : global.game.width;
-    player.screenHeight = c.height = global.screen.height = global.playerType == 'player' ? window.innerHeight : global.game.height;
+    player.screenWidth = c.width = global.screen.width =
+        global.playerType == 'player' ? window.innerWidth : global.game.width;
+    player.screenHeight = c.height = global.screen.height =
+        global.playerType == 'player' ? window.innerHeight : global.game.height;
 
     if (global.playerType == 'spectator') {
         player.x = global.game.width / 2;
         player.y = global.game.height / 2;
     }
 
-    socket.emit('windowResized', { screenWidth: global.screen.width, screenHeight: global.screen.height });
+    socket.emit('windowResized', {
+        screenWidth: global.screen.width,
+        screenHeight: global.screen.height
+    });
 }
